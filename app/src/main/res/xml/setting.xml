@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Type Of Movies"
+        android:icon="@drawable/ic_local_movies_black_24dp"
+        android:iconSpaceReserved="true"
+        android:selectable="true"
+        android:singleLineTitle="true"
+        >
+        <ListPreference android:title="Movies"
+            android:key="movies"
+           android:entries="@array/Data"
+            android:entryValues="@array/EntryData"
+            android:summary="@string/DefaultShow"
+            ></ListPreference>
+
+
+    </PreferenceCategory>
+</PreferenceScreen>

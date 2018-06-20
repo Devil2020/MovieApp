@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">M Movies</string>
+    <string name="DefaultShow">Populer</string>
+    <string-array name="Data">
+        <item>Populer</item>
+        <item>Top Rated</item>
+    </string-array>
+    <string-array name="EntryData">
+        <item>Populer</item>
+        <item>Top Rated</item>
+    </string-array>
+</resources>
