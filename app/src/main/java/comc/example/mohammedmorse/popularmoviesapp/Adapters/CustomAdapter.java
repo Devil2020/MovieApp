@@ -1,24 +1,21 @@
-package comc.example.mohammedmorse.popularmoviesapp;
+package comc.example.mohammedmorse.popularmoviesapp.Adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.os.Parcelable;
-import android.support.constraint.ConstraintLayout;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+
+import comc.example.mohammedmorse.popularmoviesapp.DetailActivity;
+import comc.example.mohammedmorse.popularmoviesapp.Model.MovieModelData;
+import comc.example.mohammedmorse.popularmoviesapp.R;
 
 /**
  * Created by Mohammed Morse on 16/06/2018.
@@ -46,7 +43,9 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.Holder> {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(context,DetailActivity.class);
+                intent.putExtra("Position",position);
                intent.putExtra("Name",myData.get(position).getName());
+                intent.putExtra("id",myData.get(position).getId());
                 intent.putExtra("Date",myData.get(position).getReleaseDate());
                 intent.putExtra("Rate",myData.get(position).getRate());
                 intent.putExtra("Overview",myData.get(position).getOverview());

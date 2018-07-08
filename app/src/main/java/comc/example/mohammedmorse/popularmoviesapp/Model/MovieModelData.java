@@ -1,4 +1,6 @@
-package comc.example.mohammedmorse.popularmoviesapp;
+package comc.example.mohammedmorse.popularmoviesapp.Model;
+
+import java.util.ArrayList;
 
 /**
  * Created by Mohammed Morse on 16/06/2018.
@@ -8,6 +10,15 @@ public class MovieModelData {
     public String Name;
     public String PosterMovie;
 
+    public int getId() {
+        return Id;
+    }
+
+    public void setId(int id) {
+        Id = id;
+    }
+
+    public int Id;
     public String getName() {
         return Name;
     }
@@ -22,7 +33,7 @@ public class MovieModelData {
     }
 
     public void setPosterMovie(String posterMovie) {
-        PosterMovie = "http://image.tmdb.org/t/p/w185/"+posterMovie;
+        PosterMovie = "http://image.tmdb.org/t/p/w185"+posterMovie;
     }
 
     public String getBackgroundMovie() {
@@ -61,4 +72,24 @@ public class MovieModelData {
     public int Rate;
     public String Overview;
     public String ReleaseDate;
+
+    public ArrayList<ReviewData> getReviewData() {
+        return reviewData;
+    }
+
+    public void setReviewData(ArrayList<ReviewData> reviewData) {
+        this.reviewData = reviewData;
+    }
+
+    public ArrayList<ReviewData> reviewData;
+
+    public ArrayList<TrailerData> getTrailerData() {
+        return trailerData;
+    }
+
+    public void setTrailerData(ArrayList<TrailerData> trailerData) {
+        this.trailerData = trailerData;
+    }
+
+    public ArrayList<TrailerData> trailerData;
 }

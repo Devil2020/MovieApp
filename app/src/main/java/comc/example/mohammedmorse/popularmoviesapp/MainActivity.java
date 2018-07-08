@@ -1,24 +1,24 @@
 package comc.example.mohammedmorse.popularmoviesapp;
 
-import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -33,67 +33,97 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Scanner;
 
-import butterknife.BindView;
+import comc.example.mohammedmorse.popularmoviesapp.Adapters.CustomAdapter;
+import comc.example.mohammedmorse.popularmoviesapp.DataBase.MovieContract;
+import comc.example.mohammedmorse.popularmoviesapp.DataBase.MovieDataBase;
+import comc.example.mohammedmorse.popularmoviesapp.Model.ApiUrlBuilder;
+import comc.example.mohammedmorse.popularmoviesapp.Model.MovieModelData;
+import comc.example.mohammedmorse.popularmoviesapp.Model.ReviewData;
+import comc.example.mohammedmorse.popularmoviesapp.Model.TrailerData;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-     String PopularUrl="http://api.themoviedb.org/3/movie/popular?api_key=12ae0210d107863fd1d89b1e2ee1f26a";
-     String TopRated="http://api.themoviedb.org/3/movie/top_rated?api_key=12ae0210d107863fd1d89b1e2ee1f26a";
+     public ApiUrlBuilder uri;
      String FinalUrl=null;
+     boolean ifNotConnect=false;
+     ProgressDialog dialog;
      ArrayList<MovieModelData> myData;
      CustomAdapter adapter;
     RecyclerView.LayoutManager manager;
+    ImageView imageView;
     RequestQueue requestQueue;
      ProgressBar progressBar;
+     MovieDataBase dataBase;
     RecyclerView MyrecyclerView;
+    FloatingActionButton button;
     boolean networkAvailability;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setTitle("Movies");
+        dialog=new ProgressDialog(this);
+        dataBase=new MovieDataBase(this);
+        uri=new ApiUrlBuilder();
+        imageView=findViewById(R.id.myImage);
+        button=findViewById(R.id.floatingImage);
         myData=new ArrayList<MovieModelData>();
         MyrecyclerView=findViewById(R.id.MyrecyclerList);
         manager=new GridLayoutManager(this,2);
-
         adapter=new CustomAdapter(this,myData);
         requestQueue=Volley.newRequestQueue(this);
         MyrecyclerView.setAdapter(adapter);
+
         MyrecyclerView.setLayoutManager(manager);
+        SharedPreferences preferences= android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(this);
+        preferences.registerOnSharedPreferenceChangeListener(this);
         networkAvailability=CheckTheNetwork();
         if(networkAvailability==false){
            // progressBar.setVisibility(View.INVISIBLE);
             ShowAlerDialog();
+            ifNotConnect=true;
+        }
+        else {
+            FinalUrl=GetFinalUrl();
+            GetMoviesDetails(FinalUrl);
         }
 
     }
-
     @Override
     protected void onResume() {
+        if(ifNotConnect==true){
+            button.setVisibility(View.VISIBLE);
+        }
+        // Check if Iam in Favourite Or Not
+        if(myData.size()<20){
+            ArrayList<MovieModelData> data =new ArrayList<>();
+
+            try {
+                Cursor cursor=dataBase.Select();
+                data=OperationInCursor(cursor);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            myData.clear();
+            myData.addAll(data);
+            adapter.notifyDataSetChanged();
+        }
+
+
         super.onResume();
-        FinalUrl=GetFinalUrl();
-        GetMovies(FinalUrl);
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.settingmenu,menu);
         return super.onCreateOptionsMenu(menu);
     }
-
+    public void SetLoadingDialog(){
+        dialog.setMessage("Loading");
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setMax(100);
+        dialog.show();
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id=item.getItemId();
@@ -103,6 +133,35 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
         else if(id==R.id.about){
             Toast.makeText(this, "My Name is Mohammed Morse , 20 Years Old", Toast.LENGTH_LONG).show();
+        }
+        else if(id==R.id.favourite){
+            ArrayList<MovieModelData> data =new ArrayList<>();
+
+            try {
+                Cursor cursor=dataBase.Select();
+                data=OperationInCursor(cursor);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            // dialog.dismiss();
+                if(data.size()==0){
+                    imageView.setVisibility(View.VISIBLE);
+                    MyrecyclerView.setVisibility(View.INVISIBLE);
+                    Toast.makeText(this, "It`s Empty ", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                     myData.clear();
+                     adapter.notifyDataSetChanged();
+                    myData.addAll(data);
+                    if(imageView.getVisibility()==View.VISIBLE) {
+                        imageView.setVisibility(View.INVISIBLE);
+                        MyrecyclerView.setVisibility(View.VISIBLE);
+                    }
+                  //  Toast.makeText(this, "The data is "+data.get(0).getName()+"Poster Image is "+data.get(0).getPosterMovie() +"Review Data "+data.get(0).getReviewData().toString(), Toast.LENGTH_SHORT).show();
+                    adapter.notifyDataSetChanged();
+                }
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -139,8 +198,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         });
         builder.show();
     }
-    public void GetMovies(String Url){
-        final JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, Url, null, new Response.Listener<JSONObject>() {
+    public void GetMoviesDetails(String Url){
+          final JsonObjectRequest request=new JsonObjectRequest(Request.Method.GET, Url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 myData.clear();
@@ -151,6 +210,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     for(int i=0;i<size;i++){
                         MovieModelData data=new MovieModelData();
                           JSONObject object=resultarray.getJSONObject(i);
+                          data.setId(object.getInt("id"));
                           data.setName(object.getString("title"));
                           data.setOverview(object.getString("overview"));
                           data.setRate(object.getInt("vote_average"));
@@ -176,29 +236,75 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     }
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+     if(imageView.getVisibility()==View.VISIBLE) {
+         imageView.setVisibility(View.INVISIBLE);
+         MyrecyclerView.setVisibility(View.VISIBLE);
+     }
+        //Toast.makeText(MainActivity.this, "This Shared Preference Switched ", Toast.LENGTH_LONG).show();
         String movieChoise=sharedPreferences.getString("movies","Populer");
         if(movieChoise.equals("Populer")){
-          FinalUrl=PopularUrl;
+          FinalUrl=uri.getPopularUrl();
         }
         else {
-            FinalUrl=TopRated;
+            FinalUrl=uri.getTopRated();
         }
-       // GetMovies(FinalUrl);
+        GetMoviesDetails(FinalUrl);
     }
-public String GetFinalUrl(){
+    public String GetFinalUrl(){
     SharedPreferences preferences= android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(this);
     String movieChoise=preferences.getString("movies","Populer");
     if(movieChoise.equals("Populer")){
-        FinalUrl=PopularUrl;
+        FinalUrl=uri.getPopularUrl();
+
     }
     else if(movieChoise.equals("Top Rated")){
-        FinalUrl=TopRated;
+        FinalUrl=uri.getTopRated();
     }
+    imageView.setVisibility(View.INVISIBLE);
+    MyrecyclerView.setVisibility(View.VISIBLE);
     return FinalUrl;
 }
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+
+    super.onPause();
+}
+    @Override
+    protected void onDestroy() {
         PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
+        super.onDestroy();
+    }
+    public ArrayList<MovieModelData> OperationInCursor(Cursor cursor) throws JSONException {
+        ArrayList<MovieModelData> data =new ArrayList<>();
+            cursor.moveToFirst();
+            MovieModelData modelData;
+            for(int i=0;i<cursor.getCount();i++){
+                modelData=new MovieModelData();
+                modelData.setId(cursor.getInt(cursor.getColumnIndex(MovieContract.id)));
+                modelData.setName(cursor.getString(cursor.getColumnIndex(MovieContract.name)));
+                modelData.PosterMovie=cursor.getString(cursor.getColumnIndex(MovieContract.postermovie));
+                modelData.BackgroundMovie=cursor.getString(cursor.getColumnIndex(MovieContract.backgroundmovie));
+                modelData.setRate(cursor.getInt(cursor.getColumnIndex(MovieContract.rate)));
+                modelData.setOverview(cursor.getString(cursor.getColumnIndex(MovieContract.overview)));
+                modelData.setReleaseDate(cursor.getString(cursor.getColumnIndex(MovieContract.releasedate)));
+                String Review=cursor.getString(cursor.getColumnIndex(MovieContract.reviewdata));
+                String Trailer=cursor.getString(cursor.getColumnIndex(MovieContract.trailerdata));
+                // ArrayList<ReviewData> ReviewArray = new Gson().fromJson(Review, new TypeToken<ArrayList<ReviewData>>(){}.getType());
+                ArrayList<ReviewData> ReviewArray=dataBase.ReturnReviewsAsArrayList(Review);
+                modelData.setReviewData(ReviewArray);
+                //ArrayList<TrailerData> TrailerArray = new Gson().fromJson(Trailer, new TypeToken<ArrayList<TrailerData>>(){}.getType());
+                ArrayList<TrailerData> TrailerArray=dataBase.ReturnTrailerAsArrayList(Trailer);
+                modelData.setTrailerData(TrailerArray);
+                data.add(modelData);
+                cursor.moveToNext();
+            }
+            cursor.close();
+            return data;
+    }
+    public void Refresh(View view) {
+        FinalUrl= GetFinalUrl();
+        GetMoviesDetails(FinalUrl);
+        button.setVisibility(View.INVISIBLE);
+        ifNotConnect=false;
     }
 }

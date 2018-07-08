@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="comc.example.mohammedmorse.popularmoviesapp">
-
+    <permission android:name="android.permission.READ_Data_From_MY_Provider"></permission>
+        <permission android:name="android.permission.Write_Data_To_MY_Provider"/>
     <uses-permission android:name="android.permission.INTERNET" />
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
     <application
@@ -26,6 +27,13 @@
         <activity android:name=".SettingActivity"
             android:parentActivityName=".MainActivity"
             ></activity>
+        <provider
+            android:authorities="comc.example.mohammedmorse.popularmoviesapp"
+            android:name=".ContentProvider.myContentProvider"
+            android:readPermission="android.permission.READ_Data_From_MY_Provider"
+            android:writePermission="android.permission.Write_Data_To_MY_Provider"
+            android:grantUriPermissions="true"
+            android:exported="true"
+            ></provider>
     </application>
-
 </manifest>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:id="@+id/ConstrainTrailer"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="70dp"
+        android:src="@drawable/youtube"
+        android:id="@+id/TrailerImage"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        />
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toRightOf="@id/TrailerImage"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="Name"
+        android:paddingTop="0dp"
+        android:layout_marginBottom="5dp"
+        android:textSize="14sp"
+        android:layout_marginLeft="5dp"
+        android:textColor="#000"
+        android:id="@+id/MovieNameTrailer"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/MovieNameTrailer"
+        android:paddingTop="30dp"
+        android:layout_marginLeft="5dp"
+        android:textSize="12sp"
+        android:id="@+id/MovieSizeTrailer"
+        />
+
+    </LinearLayout>
+    </ScrollView>
+</android.support.constraint.ConstraintLayout>

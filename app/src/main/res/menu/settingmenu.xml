@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 <item android:id="@+id/setting"
     android:title="Setting"
     ></item>
     <item android:title="About"
         android:id="@+id/about"
         ></item>
+    <item android:icon="@drawable/fav"
+        android:id="@+id/favourite"
+        android:title="Favourite"
+        app:showAsAction="ifRoom"
+        ></item>
+
 </menu>

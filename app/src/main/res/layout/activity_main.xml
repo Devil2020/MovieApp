@@ -10,5 +10,23 @@
         android:layout_height="match_parent"
         android:id="@+id/MyrecyclerList"
        />
-
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@android:color/holo_red_light"
+        android:background="@drawable/ic_refresh_black_24dp"
+        android:src="@drawable/ic_refresh_black_24dp"
+        android:onClick="Refresh"
+        android:layout_gravity="center|top"
+        android:visibility="invisible"
+        android:elevation="10dp"
+        android:id="@+id/floatingImage"
+        />
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/noimage"
+        android:id="@+id/myImage"
+        android:visibility="invisible"
+        />
 </FrameLayout>
