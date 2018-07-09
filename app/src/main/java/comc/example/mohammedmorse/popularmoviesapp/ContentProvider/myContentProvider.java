@@ -74,6 +74,12 @@ public UriMatcher Match(){
     }
 
     @Override
+    public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
+
+    return super.bulkInsert(uri, values);
+    }
+
+    @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
         int Num=matcher.match(uri);
         if(Num==4)

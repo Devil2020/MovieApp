@@ -36,6 +36,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import comc.example.mohammedmorse.popularmoviesapp.Adapters.CustomAdapter;
+import comc.example.mohammedmorse.popularmoviesapp.ContentProvider.ContentProviderContract;
 import comc.example.mohammedmorse.popularmoviesapp.DataBase.MovieContract;
 import comc.example.mohammedmorse.popularmoviesapp.DataBase.MovieDataBase;
 import comc.example.mohammedmorse.popularmoviesapp.Model.ApiUrlBuilder;
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     RecyclerView MyrecyclerView;
     FloatingActionButton button;
     boolean networkAvailability;
+    boolean IamVisitFavPage;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             button.setVisibility(View.VISIBLE);
         }
         // Check if Iam in Favourite Or Not
-        if(myData.size()<20){
+        if(myData.size()<20||myData.size()>20||IamVisitFavPage==true){
             ArrayList<MovieModelData> data =new ArrayList<>();
 
             try {
@@ -136,9 +138,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
         else if(id==R.id.favourite){
             ArrayList<MovieModelData> data =new ArrayList<>();
-
+             IamVisitFavPage=true;
             try {
-                Cursor cursor=dataBase.Select();
+                Cursor cursor=getContentResolver().query(ContentProviderContract.URITOTABLE,null,null,null,null);
                 data=OperationInCursor(cursor);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -248,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         else {
             FinalUrl=uri.getTopRated();
         }
+        IamVisitFavPage=false;
         GetMoviesDetails(FinalUrl);
     }
     public String GetFinalUrl(){

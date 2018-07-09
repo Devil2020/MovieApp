@@ -127,10 +127,15 @@ public class DetailActivity extends AppCompatActivity implements MyCustomCallBac
         detailBinding.MovieRateDetail.setText(String .valueOf(data.getRate())+"/10");
         detailBinding.MovieOverviewDetail.setText(data.getOverview());
         detailBinding.MovieDateDetail.setText(data.getReleaseDate());
-
         dialog.dismiss();
    // Toast.makeText(this, data.getName()+" is a very good Chooise for watching it ", Toast.LENGTH_LONG).show();
 }
+
+    @Override
+    protected void onResume() {
+      // dialog.dismiss();
+        super.onResume();
+    }
 
     public void GetMovieReview(int Id){
         urls.setId(Id);
