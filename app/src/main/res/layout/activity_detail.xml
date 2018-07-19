@@ -2,11 +2,13 @@
 <layout>
     <ScrollView android:layout_width="match_parent"
         android:layout_height="match_parent"
-        xmlns:android="http://schemas.android.com/apk/res/android">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/ScrollView">
         <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
+            android:background="#fff"
             android:layout_height="match_parent"
             tools:context="comc.example.mohammedmorse.popularmoviesapp.DetailActivity">
             <android.support.design.widget.FloatingActionButton
@@ -25,13 +27,25 @@
                 android:layout_height="200dp"
                 android:scaleType="fitXY"
                 app:layout_constraintTop_toTopOf="parent" />
-
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:elevation="10dp"
+    android:layout_marginTop="5dp"
+    android:id="@+id/Alllinearsparent"
+    app:layout_constraintTop_toBottomOf="@+id/MovieBackroundImage"
+    >
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                app:layout_constraintTop_toBottomOf="@id/MovieBackroundImage"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
+                android:paddingLeft="10dp"
+                app:layout_constraintTop_toBottomOf="@id/Alllinearsparent"
                 android:id="@+id/Linear1"
+                android:background="#fff"
                 android:divider="?android:dividerVertical"
                 android:showDividers="end"
                 >
@@ -55,8 +69,12 @@
                 android:layout_marginTop="10dp"
                 android:divider="?android:dividerVertical"
                 android:showDividers="end"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
                 app:layout_constraintTop_toBottomOf="@id/Linear1"
                 android:id="@+id/Linear2"
+                android:background="#fff"
+                android:paddingLeft="10dp"
                 >
                 <TextView
                     android:layout_width="wrap_content"
@@ -79,8 +97,12 @@
                 android:layout_marginTop="10dp"
                 android:divider="?android:dividerVertical"
                 android:showDividers="end"
+                android:paddingLeft="10dp"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
                 app:layout_constraintTop_toBottomOf="@id/Linear2"
                 android:id="@+id/Linear3"
+                android:background="#fff"
                 >
                 <TextView
                     android:layout_width="wrap_content"
@@ -99,11 +121,15 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
+                android:paddingLeft="10dp"
                 android:layout_marginTop="10dp"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
                 android:divider="?android:dividerVertical"
                 android:showDividers="end"
                 app:layout_constraintTop_toBottomOf="@id/Linear3"
                 android:id="@+id/Linear4"
+                android:background="#fff"
                 >
                 <TextView
                     android:layout_width="wrap_content"
@@ -122,12 +148,15 @@
                         />
                 </ScrollView>
             </LinearLayout>
+</LinearLayout>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/ReviewP"
-                app:layout_constraintTop_toBottomOf="@id/Linear4"
+                android:paddingLeft="10dp"
+                app:layout_constraintTop_toBottomOf="@id/Alllinearsparent"
                 android:layout_marginTop="10dp"
+                 android:elevation="3dp"
                 android:text="Review:"
                 android:textColor="#000"
                 />
@@ -135,8 +164,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/Review"
+                android:layout_marginLeft="1dp"
+                android:elevation="5dp"
+                android:layout_marginRight="1dp"
                 app:layout_constraintTop_toBottomOf="@id/ReviewP"
                 app:layout_constraintLeft_toLeftOf="parent"
+                android:background="#fff"
                 ></android.support.v7.widget.RecyclerView>
             <TextView
                 android:layout_width="wrap_content"
@@ -145,14 +178,19 @@
                 android:layout_marginTop="10dp"
                 app:layout_constraintTop_toBottomOf="@id/Review"
                 android:text="Trailer:"
+                android:elevation="3dp"
                 android:textColor="#000"
                 />
             <android.support.v7.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toBottomOf="@id/TrailerP"
+                 android:elevation="5dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 android:id="@+id/Trailer"
+                android:background="#fff"
+                android:layout_marginLeft="1dp"
+                android:layout_marginRight="1dp"
                 ></android.support.v7.widget.RecyclerView>
         </android.support.constraint.ConstraintLayout>
 

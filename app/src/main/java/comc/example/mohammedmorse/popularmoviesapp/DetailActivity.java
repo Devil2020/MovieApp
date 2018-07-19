@@ -3,11 +3,16 @@ package comc.example.mohammedmorse.popularmoviesapp;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.databinding.DataBindingUtil;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.Parcelable;
+import android.os.PersistableBundle;
+import android.support.annotation.UiThread;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -58,9 +63,14 @@ public class DetailActivity extends AppCompatActivity implements MyCustomCallBac
     public ArrayList<TrailerData> myTrailer;
     public TrailerAdapter trailerAdapter;
     public String MovieName;
-    public boolean ifExist;
+    //public boolean ifExist;
     public JSONArray array1;
+    public Parcelable StateR;
+    public Parcelable StateT;
     public JSONArray array2;
+    public int X=-1;
+    Cursor ifExist=null;
+    public int Y=-1;
     ArrayList<ReviewData>reviewData;
     public ReviewAdapter reviewAdapter;
     public RecyclerView.LayoutManager layoutManager;
@@ -81,6 +91,8 @@ public class DetailActivity extends AppCompatActivity implements MyCustomCallBac
           myTrailer=new ArrayList<>();
           array1=new JSONArray();
         array2=new JSONArray();
+        StateR=new Bundle();
+        StateT=new Bundle();
         reviewData=new ArrayList<>();
           dataBase=new MovieDataBase(this);
         trailerAdapter=new TrailerAdapter(this,this,myTrailer);
@@ -91,9 +103,14 @@ public class DetailActivity extends AppCompatActivity implements MyCustomCallBac
         detailBinding.Review.setAdapter(reviewAdapter);
         detailBinding.Trailer.setLayoutManager(layoutManagerc);
         detailBinding.Trailer.setAdapter(trailerAdapter);
+        DividerItemDecoration dividerItemDecoration=new DividerItemDecoration(this,DividerItemDecoration.VERTICAL);
+        detailBinding.Review.addItemDecoration(dividerItemDecoration);
+        DividerItemDecoration dividerItemDecorationCopy=new DividerItemDecoration(this,DividerItemDecoration.VERTICAL);
+        detailBinding.Trailer.addItemDecoration(dividerItemDecorationCopy);
         queue= Volley.newRequestQueue(this);
         SetLoadingDialog();
          SetData();
+        Log.i("Detail", "onCreate: Detail Activity");
     }
     public void SetData(){
         Intent intent=getIntent();
@@ -110,8 +127,10 @@ public class DetailActivity extends AppCompatActivity implements MyCustomCallBac
         String poster=intent.getStringExtra("Poster");
         data.PosterMovie=poster;
         data.BackgroundMovie=background;
-        ifExist=dataBase.IfExistInDataBaseOrNot(MovieName);
-        if(ifExist==true){
+        //ifExist=dataBase.IfExistInDataBaseOrNot(MovieName);
+        ifExist=getContentResolver().query(Uri.parse(ContentProviderContract.FinalUrl+"/"+MovieContract.name),null,
+                null,new String[]{MovieName},null);
+        if(ifExist.getCount()!=0){
             detailBinding.unorFavourite.setImageResource(R.drawable.ic_favorite);
         }
         else{
@@ -128,15 +147,108 @@ public class DetailActivity extends AppCompatActivity implements MyCustomCallBac
         detailBinding.MovieOverviewDetail.setText(data.getOverview());
         detailBinding.MovieDateDetail.setText(data.getReleaseDate());
         dialog.dismiss();
+
    // Toast.makeText(this, data.getName()+" is a very good Chooise for watching it ", Toast.LENGTH_LONG).show();
 }
+    public JSONArray ReturnReviewsAsJson(MovieModelData data) throws JSONException {
+        JSONArray myreviews = new JSONArray();
+        if(data.getReviewData().size()==0){
+            ArrayList<ReviewData> list=new ArrayList<>();
+            list.add(new ReviewData("Nothing","Nothing"));
+            data.setReviewData(list);
+
+        }
+        JSONObject Element;
+        for (int i = 0; i < data.getReviewData().size(); i++) {
+            Element = new JSONObject();
+            Element.put("name", data.getReviewData().get(i).getName());
+            Element.put("review", data.getReviewData().get(i).getReview());
+            myreviews.put(Element);
+
+        }
+        return myreviews;
+    }
+    public JSONArray ReturnTrailersAsJson(MovieModelData data) throws JSONException {
+        if(data.getReviewData().size()==0){
+            ArrayList<TrailerData> list=new ArrayList<>();
+            list.add(new TrailerData("Nothing","Nothing","Nothing"));
+            data.setTrailerData(list);
+        }
+        JSONArray mytrailers=new JSONArray();
+        JSONObject Element;
+        for (int i =0;i<data.getTrailerData().size();i++){
+            Element=new JSONObject();
+            Element.put("key",data.getTrailerData().get(i).getKey());
+            Element.put("name",data.getTrailerData().get(i).getName());
+            Element.put("size",data.getTrailerData().get(i).getSize());
+            mytrailers.put(Element);
+        }
+        return mytrailers;
+    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        StateR=layoutManager.onSaveInstanceState();
+        outState.putParcelable("ReviewRecyclerView",StateR);
+        StateT=layoutManagerc.onSaveInstanceState();
+        outState.putParcelable("TrailerRecyclerView",StateT);
+        X=detailBinding.ScrollView.getScrollX();
+        Y=detailBinding.ScrollView.getScrollY();
+        outState.putInt("X",X);
+        outState.putInt("Y",Y);
+        super.onSaveInstanceState(outState);
+        Log.i("Detail", "onSaveInstanceState: Detail ActivityX "+X +" Y "+Y);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            StateR = savedInstanceState.getParcelable("ReviewRecyclerView");
+            StateT = savedInstanceState.getParcelable("TrailerRecyclerView");
+            X = savedInstanceState.getInt("X");
+            Y = savedInstanceState.getInt("Y");
+            Log.i("Detail", "onRestoreInstanceState: Detail Activity X "+X +" Y "+Y);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.i("Detail", "onStart: Detail Activity");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i("Detail", "onPause: Detail Activity");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.i("Detail", "onStop: Detail Activity");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i("Detail", "onDestroy: Detail Activity");
+    }
 
     @Override
     protected void onResume() {
       // dialog.dismiss();
         super.onResume();
+        Log.i("Detail", "onResume: Detail Activity");
+       // layoutManager.onRestoreInstanceState(StateR);
+       // layoutManagerc.onRestoreInstanceState(StateT);
+        /*runOnUiThread(new Runnable() {
+         @Override
+         public void run() {
+           detailBinding.ScrollView.scrollTo(X,Y);
+         }
+     });*/
     }
-
     public void GetMovieReview(int Id){
         urls.setId(Id);
         urls.setReviewUrl(String.valueOf(Id));
@@ -212,6 +324,8 @@ public class DetailActivity extends AppCompatActivity implements MyCustomCallBac
                 }
                 trailerAdapter.notifyDataSetChanged();
                 data.setTrailerData(myTrailer);
+                detailBinding.ScrollView.scrollTo(X,Y);
+                Log.i("Detail","Scroll Called Now Scroll X = "+X + " and Y = "+Y);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -230,9 +344,9 @@ public class DetailActivity extends AppCompatActivity implements MyCustomCallBac
    }
     public void MakeitFavourite(View view) throws JSONException {
        // If It`s in DataBase So >>>>>>>>>>>>>> Un Favourite
-     if(ifExist==true){
+     if(ifExist.getCount()!=0){
          //Delet
-        getContentResolver().delete(ContentProviderContract.URITOTABLE,null, new String[]{String.valueOf(data.getId())});
+        getContentResolver().delete(Uri.parse(ContentProviderContract.FinalUrl+"/"+ MovieContract.name),null, new String[]{String.valueOf(data.getName())});
          detailBinding.unorFavourite.setImageResource(R.drawable.unfavourite);
          Toast.makeText(this, "Delet Operation has Done .", Toast.LENGTH_SHORT).show();
      }
@@ -257,13 +371,13 @@ public class DetailActivity extends AppCompatActivity implements MyCustomCallBac
          values.put(MovieContract.releasedate,data.getReleaseDate());
          values.put(MovieContract.rate,data.getRate());
          values.put(MovieContract.overview,data.getOverview());
-         array1=dataBase.ReturnReviewsAsJson(data);
+         array1=ReturnReviewsAsJson(data);
          String MyReview=array1.toString();
-         array2=dataBase.ReturnTrailersAsJson(data);
+         array2=ReturnTrailersAsJson(data);
          String MyTrailer=array2.toString();
          values.put(MovieContract.reviewdata,MyReview);
          values.put(MovieContract.trailerdata,MyTrailer);
-         getContentResolver().insert(ContentProviderContract.URITOTABLE,values);
+         getContentResolver().insert(ContentProviderContract.FinalUrl,values);
          detailBinding.unorFavourite.setImageResource(R.drawable.ic_favorite);
          //Insert
          Toast.makeText(this, "Insert Operation has Done .", Toast.LENGTH_SHORT).show();

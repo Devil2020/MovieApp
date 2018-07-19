@@ -13,6 +13,6 @@ public class ContentProviderContract {
     static final public String SCHEMA="content://";
     static final public String AUTHONTCATION="comc.example.mohammedmorse.popularmoviesapp";
     static final public String TABLEPATH= MovieContract.TableName;
-    static final public Uri URITOTABLE=Uri.parse(SCHEMA+AUTHONTCATION+"/"+TABLEPATH);
-    static final public Uri URITOTABLEBYNAME=Uri.parse(SCHEMA+AUTHONTCATION+"/"+TABLEPATH+"/##");
+    static final public Uri URITOTABLE=Uri.parse(SCHEMA+AUTHONTCATION);
+    static final public Uri FinalUrl=URITOTABLE.buildUpon().appendPath(TABLEPATH).build();
 }

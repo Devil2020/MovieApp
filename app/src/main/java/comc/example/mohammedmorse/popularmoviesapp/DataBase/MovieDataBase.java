@@ -42,69 +42,8 @@ public class MovieDataBase extends SQLiteOpenHelper {
             MovieContract.overview +" Text , "+MovieContract.reviewdata+" Text , "+MovieContract.trailerdata+" Text );");
     }
 
-    public ArrayList<ReviewData> ReturnReviewsAsArrayList(String data) throws JSONException {
-        ArrayList<ReviewData> dataArrayList=new ArrayList<>();
-       JSONArray array=new JSONArray(data);
-       ReviewData redata;
-       for (int i=0;i<array.length();i++){
-           redata=new ReviewData();
-           JSONObject object=array.getJSONObject(i);
-           redata.setName(object.getString("name"));
-           redata.setReview(object.getString("review"));
-           dataArrayList.add(redata);
-       }
-        return dataArrayList;
-   }
-    public ArrayList<TrailerData> ReturnTrailerAsArrayList(String data) throws JSONException {
-        ArrayList<TrailerData> dataArrayList=new ArrayList<>();
-        JSONArray array=new JSONArray(data);
-        TrailerData redata;
-        for (int i=0;i<array.length();i++){
-            redata=new TrailerData();
-            JSONObject object=array.getJSONObject(i);
-            redata.setName(object.getString("name"));
-            redata.setKey(object.getString("key"));
-            redata.setSize(object.getString("size"));
-            dataArrayList.add(redata);
-        }
-        return dataArrayList;
-    }
-    public JSONArray ReturnReviewsAsJson(MovieModelData data) throws JSONException {
-        JSONArray myreviews = new JSONArray();
-       if(data.getReviewData().size()==0){
-           ArrayList<ReviewData> list=new ArrayList<>();
-           list.add(new ReviewData("Nothing","Nothing"));
-           data.setReviewData(list);
 
-       }
-           JSONObject Element;
-           for (int i = 0; i < data.getReviewData().size(); i++) {
-               Element = new JSONObject();
-               Element.put("name", data.getReviewData().get(i).getName());
-               Element.put("review", data.getReviewData().get(i).getReview());
-               myreviews.put(Element);
-
-       }
-        return myreviews;
-}
-    public JSONArray ReturnTrailersAsJson(MovieModelData data) throws JSONException {
-        if(data.getReviewData().size()==0){
-            ArrayList<TrailerData> list=new ArrayList<>();
-            list.add(new TrailerData("Nothing","Nothing","Nothing"));
-            data.setTrailerData(list);
-        }
-        JSONArray mytrailers=new JSONArray();
-        JSONObject Element;
-        for (int i =0;i<data.getTrailerData().size();i++){
-            Element=new JSONObject();
-            Element.put("key",data.getTrailerData().get(i).getKey());
-            Element.put("name",data.getTrailerData().get(i).getName());
-            Element.put("size",data.getTrailerData().get(i).getSize());
-       mytrailers.put(Element);
-        }
-        return mytrailers;
-    }
-    public void Insert(ContentValues data) throws JSONException {
+  /*  public void Insert(ContentValues data) throws JSONException {
         SQLiteDatabase database=getWritableDatabase();
        /* ContentValues values=new ContentValues();
         values.put(MovieContract.id,data.getId());
@@ -121,7 +60,7 @@ public class MovieDataBase extends SQLiteOpenHelper {
         values.put(MovieContract.reviewdata,MyReview);
         values.put(MovieContract.trailerdata,MyTrailer);
         */
-        database.insert(MovieContract.TableName,null,data);
+     /*   database.insert(MovieContract.TableName,null,data);
         database.close();
     }
     public void Delet(String Arg ){
@@ -129,7 +68,7 @@ public class MovieDataBase extends SQLiteOpenHelper {
         database.delete(MovieContract.TableName,MovieContract.id+" =? ", new String[]{Arg});
        //   database.delete(MovieContract.TableName,MovieContract.id,new String[]{String.valueOf(data.getId())});
           database.close();
-   }
+   }*/
   /*  public ArrayList<MovieModelData> Select() throws JSONException {
        ArrayList<MovieModelData> list=new ArrayList<>();
        SQLiteDatabase database=getReadableDatabase();
@@ -161,14 +100,14 @@ public class MovieDataBase extends SQLiteOpenHelper {
         cursor.close();
        return list;
    }*/
-  public Cursor Select() throws JSONException {
+  /*public Cursor Select() throws JSONException {
 
       SQLiteDatabase database=getReadableDatabase();
       Cursor cursor=database.query(MovieContract.TableName,new String[]{MovieContract.id,MovieContract.name,MovieContract.postermovie,MovieContract.backgroundmovie,
               MovieContract.releasedate,MovieContract.rate,MovieContract.overview,MovieContract.reviewdata,MovieContract.trailerdata},null,null,null,null,null);
       return cursor;
-  }
-    public boolean IfExistInDataBaseOrNot(String MovieName){
+  }*/
+    /*public boolean IfExistInDataBaseOrNot(String MovieName){
        boolean ifExists=false;
        SQLiteDatabase database=getReadableDatabase();
        Cursor cursor=database.query(MovieContract.TableName,new String[]{MovieContract.id,MovieContract.name,MovieContract.postermovie,MovieContract.backgroundmovie,
@@ -177,7 +116,7 @@ public class MovieDataBase extends SQLiteOpenHelper {
            ifExists=true;
        }
        return ifExists;
-   }
+   }*/
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
        db.execSQL("DROP TABLE IF EXISTS "+MovieContract.TableName);

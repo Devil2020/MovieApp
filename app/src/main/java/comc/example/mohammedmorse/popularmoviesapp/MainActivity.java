@@ -7,17 +7,21 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -54,12 +58,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     RecyclerView.LayoutManager manager;
     ImageView imageView;
     RequestQueue requestQueue;
-     ProgressBar progressBar;
+
+    Parcelable State;
      MovieDataBase dataBase;
     RecyclerView MyrecyclerView;
     FloatingActionButton button;
     boolean networkAvailability;
-    boolean IamVisitFavPage;
+    boolean IamVisitFavPage=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         adapter=new CustomAdapter(this,myData);
         requestQueue=Volley.newRequestQueue(this);
         MyrecyclerView.setAdapter(adapter);
-
+        State=new Bundle();
         MyrecyclerView.setLayoutManager(manager);
         SharedPreferences preferences= android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(this);
         preferences.registerOnSharedPreferenceChangeListener(this);
@@ -90,19 +95,26 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             FinalUrl=GetFinalUrl();
             GetMoviesDetails(FinalUrl);
         }
-
+        Log.e("Cycle", "onCreate: .");
     }
     @Override
     protected void onResume() {
+        super.onResume();
         if(ifNotConnect==true){
             button.setVisibility(View.VISIBLE);
         }
+        /*if(IamVisitFavPage!=true){
+            FinalUrl=GetFinalUrl();
+            GetMoviesDetails(FinalUrl);
+        }*/
         // Check if Iam in Favourite Or Not
-        if(myData.size()<20||myData.size()>20||IamVisitFavPage==true){
+        //if((myData.size()<20||myData.size()>20)&&IamVisitFavPage==true)
+        if(IamVisitFavPage==true){
             ArrayList<MovieModelData> data =new ArrayList<>();
 
             try {
-                Cursor cursor=dataBase.Select();
+                Cursor cursor=getContentResolver().query(ContentProviderContract.FinalUrl,null,
+                        null,null,null,null);
                 data=OperationInCursor(cursor);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -111,20 +123,20 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             myData.addAll(data);
             adapter.notifyDataSetChanged();
         }
-
-
-        super.onResume();
+        Log.e("Cycle", "onResume: ");
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.e("Cycle", "onStart: " );
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        Log.e("Cycle", "onCreateOptionsMenu: ");
         getMenuInflater().inflate(R.menu.settingmenu,menu);
         return super.onCreateOptionsMenu(menu);
-    }
-    public void SetLoadingDialog(){
-        dialog.setMessage("Loading");
-        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        dialog.setMax(100);
-        dialog.show();
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -140,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             ArrayList<MovieModelData> data =new ArrayList<>();
              IamVisitFavPage=true;
             try {
-                Cursor cursor=getContentResolver().query(ContentProviderContract.URITOTABLE,null,null,null,null);
+                Cursor cursor=getContentResolver().query(ContentProviderContract.FinalUrl,null,null,null,null);
                 data=OperationInCursor(cursor);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -165,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 }
 
         }
+        Log.e("Cycle", "onOptionsItemSelected: " );
         return super.onOptionsItemSelected(item);
     }
     public boolean CheckTheNetwork(){
@@ -226,6 +239,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     e.printStackTrace();
                 }
                 adapter.notifyDataSetChanged();
+                if(State!=null){
+                    manager.onRestoreInstanceState(State);
+                }
                 Log.e("morse",String .valueOf(myData.size()));
             }
         }, new Response.ErrorListener() {
@@ -269,12 +285,36 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 }
     @Override
     protected void onPause() {
-
-    super.onPause();
+        Log.e("Cycle", "onPause: ");
+        super.onPause();
 }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        State=manager.onSaveInstanceState();
+        outState.putParcelable("Position",State);
+        outState.putBoolean("IfFavourite",IamVisitFavPage);
+        //Log.e("LifeCycle","OnSavedInstance X "+((LinearLayoutManager)MyrecyclerView.getLayoutManager()).findFirstVisibleItemPosition());
+        Log.e("LifeCycle","OnSaveInstance "+IamVisitFavPage);
+        super.onSaveInstanceState(outState);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if(savedInstanceState!=null) {
+            State = savedInstanceState.getParcelable("Position");
+            IamVisitFavPage=savedInstanceState.getBoolean("IfFavourite");
+            Log.e("LifeCycle","OnRestoreInstance "+IamVisitFavPage);
+        }
+
+    }
+
     @Override
     protected void onDestroy() {
         PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
+        Log.e("Cycle", "onDestroy: ");
         super.onDestroy();
     }
     public ArrayList<MovieModelData> OperationInCursor(Cursor cursor) throws JSONException {
@@ -293,16 +333,43 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 String Review=cursor.getString(cursor.getColumnIndex(MovieContract.reviewdata));
                 String Trailer=cursor.getString(cursor.getColumnIndex(MovieContract.trailerdata));
                 // ArrayList<ReviewData> ReviewArray = new Gson().fromJson(Review, new TypeToken<ArrayList<ReviewData>>(){}.getType());
-                ArrayList<ReviewData> ReviewArray=dataBase.ReturnReviewsAsArrayList(Review);
+                ArrayList<ReviewData> ReviewArray=ReturnReviewsAsArrayList(Review);
                 modelData.setReviewData(ReviewArray);
                 //ArrayList<TrailerData> TrailerArray = new Gson().fromJson(Trailer, new TypeToken<ArrayList<TrailerData>>(){}.getType());
-                ArrayList<TrailerData> TrailerArray=dataBase.ReturnTrailerAsArrayList(Trailer);
+                ArrayList<TrailerData> TrailerArray=ReturnTrailerAsArrayList(Trailer);
                 modelData.setTrailerData(TrailerArray);
                 data.add(modelData);
                 cursor.moveToNext();
             }
             cursor.close();
             return data;
+    }
+    public ArrayList<ReviewData> ReturnReviewsAsArrayList(String data) throws JSONException {
+        ArrayList<ReviewData> dataArrayList=new ArrayList<>();
+        JSONArray array=new JSONArray(data);
+        ReviewData redata;
+        for (int i=0;i<array.length();i++){
+            redata=new ReviewData();
+            JSONObject object=array.getJSONObject(i);
+            redata.setName(object.getString("name"));
+            redata.setReview(object.getString("review"));
+            dataArrayList.add(redata);
+        }
+        return dataArrayList;
+    }
+    public ArrayList<TrailerData> ReturnTrailerAsArrayList(String data) throws JSONException {
+        ArrayList<TrailerData> dataArrayList=new ArrayList<>();
+        JSONArray array=new JSONArray(data);
+        TrailerData redata;
+        for (int i=0;i<array.length();i++){
+            redata=new TrailerData();
+            JSONObject object=array.getJSONObject(i);
+            redata.setName(object.getString("name"));
+            redata.setKey(object.getString("key"));
+            redata.setSize(object.getString("size"));
+            dataArrayList.add(redata);
+        }
+        return dataArrayList;
     }
     public void Refresh(View view) {
         FinalUrl= GetFinalUrl();
